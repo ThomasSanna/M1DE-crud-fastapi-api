@@ -1,8 +1,9 @@
 from datetime import datetime
 from fastapi import APIRouter, Form, Depends, HTTPException
 from sqlmodel import Session, select
-from models import User
+from db.models import User
 from db.database import get_session
+from security import hash_password
 
 router = APIRouter(prefix="/api")
 
@@ -23,7 +24,7 @@ def get_user(user_id: int, session: Session = Depends(get_session)):
 def create_user(email: str = Form(...), password: str = Form(...), session: Session = Depends(get_session)):
     if session.exec(select(User).where(User.user_mail==email)).first():
         raise HTTPException(status_code=400, detail="Email already in use")
-    user = User(user_login=email, user_mail=email, user_password=password, user_date_new=datetime.now())
+    user = User(user_login=email, user_mail=email, user_password=hash_password(password), user_date_new=datetime.now())
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -38,7 +39,7 @@ def update_user(user_id: int, email: str | None = Form(None), password: str | No
         user.user_login = email
         user.user_mail = email
     if password:
-        user.user_password = password
+        user.user_password = hash_password(password)
     session.add(user)
     session.commit()
     return {"message": "User updated", "user_id": user.user_id}
@@ -54,7 +55,7 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
 
 
 # Produit endpoints
-from models import Produit
+from db.models import Produit
 
 
 @router.get("/produits")

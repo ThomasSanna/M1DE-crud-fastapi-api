@@ -3,9 +3,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select, func
 from datetime import datetime
 from db.database import get_session
-from models import User, Produit, UserRole
+from db.models import User, Produit, UserRole
 from fastapi.templating import Jinja2Templates
-from security import create_access_token, get_current_user_from_cookie
+from security import create_access_token, get_current_user_from_cookie, hash_password, verify_password
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -22,8 +22,8 @@ def login_form(request: Request):
 
 @router.post("/login", response_class=HTMLResponse)
 def login_user(request: Request, email: str = Form(...), password: str = Form(...), session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.user_mail==email, User.user_password==password)).first()
-    if not user:
+    user = session.exec(select(User).where(User.user_mail==email)).first()
+    if not user or not verify_password(password, user.user_password):
         return templates.TemplateResponse("login.html", {"request": request, "error": "Email ou mot de passe invalide"})
     user.user_date_login = datetime.now()
     session.add(user)
@@ -51,23 +51,27 @@ def register_form(request: Request):
 
 @router.post("/register", response_class=HTMLResponse)
 def register_user(request: Request, email: str = Form(...), password: str = Form(...), session: Session = Depends(get_session)):
-    existing = session.exec(select(User).where(User.user_mail==email)).first()
-    if existing:
-        return templates.TemplateResponse("register.html", {"request": request, "error": "Email déjà utilisée"})
-    #ajout user_compte_id
-    max_id = session.scalar(select(func.max(User.user_compte_id)))
-    new_compte_id = (max_id or 0) + 1
+    try:
+        existing = session.exec(select(User).where(User.user_mail==email)).first()
+        if existing:
+            return templates.TemplateResponse("register.html", {"request": request, "error": "Email déjà utilisée"})
+        #ajout user_compte_id
+        max_id = session.scalar(select(func.max(User.user_compte_id)))
+        new_compte_id = (max_id or 0) + 1
 
-    user = User(user_login=email, 
-                user_mail=email, 
-                user_password=password, 
-                user_compte_id=new_compte_id, 
-                user_date_new=datetime.now(), 
-                user_date_login=datetime.now()
-                )
-    session.add(user)
-    session.commit()
-    return RedirectResponse("/login", status_code=303)
+        user = User(user_login=email, 
+                    user_mail=email, 
+                    user_password=hash_password(password), 
+                    user_compte_id=new_compte_id, 
+                    user_date_new=datetime.now(), 
+                    user_date_login=datetime.now()
+                    )
+        session.add(user)
+        session.commit()
+        return RedirectResponse("/login", status_code=303)
+    except Exception as e:
+        print(f"Erreur lors de l'inscription: {str(e)}")
+        return templates.TemplateResponse("register.html", {"request": request, "error": f"Erreur lors de l'inscription: {str(e)}"})
 
 
 @router.get("/produits", response_class=HTMLResponse)
@@ -110,7 +114,7 @@ def update_profil(
     user.user_login = user_login
     user.user_mail = user_mail
     if user_password: 
-        user.user_password = user_password
+        user.user_password = hash_password(user_password)
         
     session.add(user)
     session.commit()

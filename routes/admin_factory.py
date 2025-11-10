@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Type
 from datetime import datetime
 from fastapi.templating import Jinja2Templates
-from models import  Produit, User, UserRole
+from db.models import  Produit, User, UserRole
 import shutil
 import uuid
 from pathlib import Path

@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel
 from db.database import engine
-import models
+import db.models as models
 
 def init_db():
     print("Creating database tables (if they don't exist)...")

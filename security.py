@@ -1,15 +1,29 @@
 from fastapi import Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from db.database import get_session
-from models import User, UserRole  
+from db.models import User, UserRole
+from passlib.context import CryptContext
 
+# Configuration du contexte bcrypt pour le hachage des mots de passe
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = "ceci est une phrase tres secrete"
 ALGORITHM = "HS256"
-COOKIE_NAME = "access_token" 
+COOKIE_NAME = "access_token"
+
+def hash_password(password: str) -> str:
+    """Hache un mot de passe avec bcrypt."""
+    # Limiter le mot de passe à 72 bytes (limite de bcrypt)
+    password_truncated = password[:72]
+    return pwd_context.hash(password_truncated)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Vérifie un mot de passe en le comparant avec son hash."""
+    # Limiter le mot de passe à 72 bytes (limite de bcrypt)
+    password_truncated = plain_password[:72]
+    return pwd_context.verify(password_truncated, hashed_password)
 
 def create_access_token(data: dict):
     """Crée un token JWT sécurisé (badge)"""

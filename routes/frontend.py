@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select, func
 from datetime import datetime
-from database import get_session
+from db.database import get_session
 from models import User, Produit, UserRole
 from fastapi.templating import Jinja2Templates
 from security import create_access_token, get_current_user_from_cookie

@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Form, Depends, HTTPException
 from sqlmodel import Session, select
 from models import User
-from database import get_session
+from db.database import get_session
 
 router = APIRouter(prefix="/api")
 

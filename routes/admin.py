@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Form , Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from database import get_session
+from db.database import get_session
 from models import Produit, User, ProduitForm, UserForm, UserUpdateForm, UserRole
 from .admin_factory import create_admin_crud_router
 from security import is_admin

@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from database import get_session
+from db.database import get_session
 from models import User, UserRole  
 
 

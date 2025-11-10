@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-  <rect width="100%" height="100%" fill="#f0fff6"/>
-  <rect x="120" y="50" width="160" height="110" fill="#b2f0d6" rx="12" />
-  <text x="200" y="220" font-family="Segoe UI, Arial" font-size="18" fill="#6b657f" text-anchor="middle">Produit - image 2</text>
-</svg>

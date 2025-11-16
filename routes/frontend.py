@@ -75,10 +75,23 @@ def register_user(request: Request, email: str = Form(...), password: str = Form
 
 
 @router.get("/produits", response_class=HTMLResponse)
-def produits_list(request: Request, session: Session = Depends(get_session)):
-    produits = session.exec(select(Produit)).all()
-    # produits is a list of Produit objects; pass to template
-    return templates.TemplateResponse("produits.html", {"request": request, "produits": produits})
+def produits_list(request: Request, type_p: str | None = None, session: Session = Depends(get_session)):
+    """Affiche la liste des produits avec possibilité de filtrer par type"""
+    query = select(Produit)
+    if type_p:
+        query = query.where(Produit.type_p == type_p)
+    produits = session.exec(query).all()
+    
+    # Récupère tous les types disponibles pour le filtre
+    all_types = session.exec(select(Produit.type_p).distinct()).all()
+    types_list = sorted(list(set(all_types)))
+    
+    return templates.TemplateResponse("produits.html", {
+        "request": request, 
+        "produits": produits,
+        "types": types_list,
+        "selected_type": type_p
+    })
 
 @router.get("/profil", response_class=HTMLResponse)
 def get_profil(

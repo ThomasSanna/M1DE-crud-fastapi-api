@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Liste des Produits</title>
     <link rel="stylesheet" href="/static/style.css"> 
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div class="container products-container"> 
@@ -12,7 +13,39 @@
             <h2>Liste des Produits</h2>
             <a href="/profil" class="btn-link">Mon Profil</a> 
         </div>
+
+        <!-- Système de filtrage par type -->
+        <div style="margin-bottom: 2rem;">
+            <label for="typeFilter" style="font-weight: bold; margin-right: 1rem;">Filtrer par type :</label>
+            <select id="typeFilter" onchange="filterByType()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                <option value="">Tous les produits</option>
+                {% for type in types %}
+                <option value="{{ type }}" {% if selected_type == type %}selected{% endif %}>{{ type }}</option>
+                {% endfor %}
+            </select>
+            
+            {% if selected_type %}
+            <a href="/produits" style="margin-left: 1rem; color: #dc3545; text-decoration: none;">✕ Effacer le filtre</a>
+            {% endif %}
+        </div>
+
+        <script>
+            function filterByType() {
+                const select = document.getElementById('typeFilter');
+                const type = select.value;
+                if (type) {
+                    window.location.href = '/produits?type_p=' + encodeURIComponent(type);
+                } else {
+                    window.location.href = '/produits';
+                }
+            }
+        </script>
+
         {% if produits and produits|length > 0 %}
+        <p style="color: #666; margin-bottom: 1rem;">
+            <strong>{{ produits|length }}</strong> produit(s) trouvé(s)
+            {% if selected_type %} dans la catégorie <strong>{{ selected_type }}</strong>{% endif %}
+        </p>
         <table>
             <thead>
                 <tr>

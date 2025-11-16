@@ -59,8 +59,20 @@ from db.models import Produit
 
 
 @router.get("/produits")
-def get_produits(session: Session = Depends(get_session)):
-    return session.exec(select(Produit)).all()
+def get_produits(type_p: str | None = None, session: Session = Depends(get_session)):
+    """Récupère tous les produits, avec possibilité de filtrer par type"""
+    query = select(Produit)
+    if type_p:
+        query = query.where(Produit.type_p == type_p)
+    return session.exec(query).all()
+
+
+@router.get("/produits/types")
+def get_product_types(session: Session = Depends(get_session)):
+    """Récupère la liste des types de produits disponibles"""
+    from sqlmodel import col
+    types = session.exec(select(Produit.type_p).distinct()).all()
+    return {"types": sorted(list(set(types)))}
 
 
 @router.get("/produits/{id_p}")

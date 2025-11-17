@@ -13,10 +13,24 @@ class User(SQLModel, table=True):
     user_login: str
     user_password: str
     user_mail: str
-    user_compte_id : int 
+    panier_id: int | None = Field(default=None, foreign_key="panier.panier_id")
     user_date_new: datetime
     user_date_login: datetime | None = None
     user_role: str = Field(default=UserRole.USER)
+
+
+class Panier(SQLModel, table=True):
+    __tablename__ = "panier"
+    panier_id: int | None = Field(default=None, primary_key=True)
+    panier_date_creation: datetime = Field(default_factory=datetime.now)
+
+
+class ProduitPanier(SQLModel, table=True):
+    __tablename__ = "produit_panier"
+    produit_panier_id: int | None = Field(default=None, primary_key=True)
+    panier_id: int = Field(foreign_key="panier.panier_id")
+    id_produit: int = Field(foreign_key="produit.id_p")
+    quantite: int = Field(default=1)
 
 
 class Produit(SQLModel, table=True):

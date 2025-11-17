@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select, func
 from datetime import datetime
 from db.database import get_session
-from db.models import User, Produit, UserRole
+from db.models import User, Produit, UserRole, Panier
 from fastapi.templating import Jinja2Templates
 from security import create_access_token, get_current_user_from_cookie, hash_password, verify_password
 
@@ -55,14 +55,17 @@ def register_user(request: Request, email: str = Form(...), password: str = Form
         existing = session.exec(select(User).where(User.user_mail==email)).first()
         if existing:
             return templates.TemplateResponse("register.html", {"request": request, "error": "Email déjà utilisée"})
-        #ajout user_compte_id
-        max_id = session.scalar(select(func.max(User.user_compte_id)))
-        new_compte_id = (max_id or 0) + 1
-
+        
+        # Créer un nouveau panier
+        panier = Panier(panier_date_creation=datetime.now())
+        session.add(panier)
+        session.flush()  # Pour obtenir le panier_id
+        
+        # Créer l'utilisateur avec le panier_id
         user = User(user_login=email, 
                     user_mail=email, 
                     user_password=hash_password(password), 
-                    user_compte_id=new_compte_id, 
+                    panier_id=panier.panier_id,
                     user_date_new=datetime.now(), 
                     user_date_login=datetime.now()
                     )

@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from routes import frontend, api, admin
 import uvicorn
 
-app = FastAPI(title="User API + UI simple")
+app = FastAPI(title="Version API sympa ^^")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(frontend.router)

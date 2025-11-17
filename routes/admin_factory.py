@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Type
 from datetime import datetime
 from fastapi.templating import Jinja2Templates
-from db.models import  Produit, User, UserRole
+from db.models import  Produit, User, UserRole, Panier
 import shutil
 import uuid
 from pathlib import Path
@@ -92,9 +92,12 @@ def create_admin_crud_router(
 
 
         if model == User:
-            max_id = session.scalar(select(func.max(User.user_compte_id)))
-            new_compte_id = (max_id or 0) + 1
-            data_dict['user_compte_id'] = new_compte_id
+            # Créer un nouveau panier
+            panier = Panier(panier_date_creation=datetime.now())
+            session.add(panier)
+            session.flush()  # Pour obtenir le panier_id
+            
+            data_dict['panier_id'] = panier.panier_id
             data_dict['user_date_new'] = datetime.now()
             data_dict['user_date_login'] = datetime.now()
             data_dict['user_role'] = UserRole.USER

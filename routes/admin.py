@@ -21,7 +21,7 @@ def admin_dashboard(request: Request):
 
 
 # --- DÉPENDANCE DE FORMULAIRE POUR PRODUIT ---
-# Cette fonction lit le formulaire et retourne un modèle ProduitForm
+# Cette fonction lit le formulaire et retourne un modèle ProduitForm qui permet de créer ou mettre à jour un produit
 def get_produit_create_form(
     type_p: str = Form(...),
     designation_p: str = Form(...),
